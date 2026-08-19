@@ -264,16 +264,6 @@ body {
   background: #4338ca;
 }
 
-.note-btn.outline {
-  background: #ffffff;
-  color: #4f46e5;
-  border: 1px solid #c7d2fe;
-}
-
-.note-btn.outline:hover {
-  background: #eef2ff;
-}
-
 .pdf-row {
   display: flex;
   align-items: center;
