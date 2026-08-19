@@ -10,6 +10,7 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MO
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX, 10) || 30;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 const MAX_NOTES_CHARS = 50000;
+const MAX_PDF_BYTES = 20 * 1024 * 1024;
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
@@ -55,6 +56,12 @@ const QUIZ_PROMPT = [
   '"answerIndex" (the index of the correct option, 0-3), and "explanation" (a one-sentence explanation).',
   'Mix recall questions with questions that test understanding.',
 ].join('\n');
+
+const NOTES_CONFIGS = {
+  summary: { prompt: SUMMARY_PROMPT, json: false, maxTokens: 2048 },
+  flashcards: { prompt: FLASHCARDS_PROMPT, json: true, maxTokens: 2048 },
+  quiz: { prompt: QUIZ_PROMPT, json: true, maxTokens: 2048 },
+};
 
 const rateLimit = new Map();
 
@@ -118,13 +125,15 @@ function readBody(req) {
   });
 }
 
-async function fetchGemini({ systemPrompt, contents, temperature, maxTokens, json }) {
+async function fetchGemini({ systemPrompt, contents, temperature, maxTokens, json, pdfBase64 }) {
   const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents,
+      contents: pdfBase64
+        ? [{ role: 'user', parts: [{ inlineData: { mimeType: 'application/pdf', data: pdfBase64 } }] }]
+        : contents,
       generationConfig: {
         temperature: temperature ?? 0.7,
         maxOutputTokens: maxTokens ?? 1024,
@@ -280,13 +289,7 @@ async function handleNotes(req, res, ip) {
     return sendJson(res, 400, { error: 'Notes are too long. Please keep them under 50,000 characters.' });
   }
 
-  const configs = {
-    summary: { prompt: SUMMARY_PROMPT, json: false, maxTokens: 2048 },
-    flashcards: { prompt: FLASHCARDS_PROMPT, json: true, maxTokens: 2048 },
-    quiz: { prompt: QUIZ_PROMPT, json: true, maxTokens: 2048 },
-  };
-
-  const config = configs[action];
+  const config = NOTES_CONFIGS[action];
   if (!config) return sendJson(res, 400, { error: 'Unknown action' });
 
   try {
@@ -306,6 +309,53 @@ async function handleNotes(req, res, ip) {
   }
 }
 
+async function handleNotesPdf(req, res, ip) {
+  if (!GEMINI_API_KEY) {
+    return sendJson(res, 500, { error: 'Server is not configured yet. Add GEMINI_API_KEY to .env' });
+  }
+
+  const limit = checkRateLimit(ip);
+  if (!limit.allowed) {
+    return sendJson(res, 429, { error: 'You reached the free hourly limit. Please try again in about an hour.' });
+  }
+
+  let body;
+  try {
+    body = JSON.parse(await readBody(req));
+  } catch {
+    return sendJson(res, 400, { error: 'Invalid request body' });
+  }
+
+  const data = typeof body.data === 'string' ? body.data : '';
+  const action = typeof body.action === 'string' ? body.action : '';
+
+  if (!data) return sendJson(res, 400, { error: 'No PDF received' });
+
+  const pdfBytes = Buffer.byteLength(data, 'base64');
+  if (pdfBytes > MAX_PDF_BYTES) {
+    return sendJson(res, 400, { error: 'PDF is too large. Please use a PDF under 20MB.' });
+  }
+
+  const config = NOTES_CONFIGS[action];
+  if (!config) return sendJson(res, 400, { error: 'Unknown action' });
+
+  try {
+    const raw = await fetchGemini({
+      systemPrompt: config.prompt,
+      pdfBase64: data,
+      temperature: 0.4,
+      maxTokens: config.maxTokens,
+      json: config.json,
+    });
+
+    const payload = config.json ? parseJsonArray(raw) : raw;
+    sendJson(res, 200, { result: payload, remaining: limit.remaining });
+  } catch (err) {
+    console.error('PDF notes error:', err.message);
+    sendJson(res, 502, { error: 'Could not read that PDF. Make sure it is real PDF file with text (not scanned images).' });
+  }
+}
+
 const server = http.createServer((req, res) => {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`);
   const ip = getClientIp(req);
@@ -315,6 +365,9 @@ const server = http.createServer((req, res) => {
   }
   if (req.method === 'POST' && pathname === '/api/notes') {
     return handleNotes(req, res, ip);
+  }
+  if (req.method === 'POST' && pathname === '/api/notes-pdf') {
+    return handleNotesPdf(req, res, ip);
   }
   if (req.method === 'GET') {
     return serveStatic(res, pathname);

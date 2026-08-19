@@ -14,6 +14,7 @@ A free study assistant for college students. Chat with an AI tutor, or paste you
 - Paste notes -> clean summary with headings and bullet points
 - Paste notes -> flip-card flashcards
 - Paste notes -> interactive quiz with instant feedback
+- **Upload a PDF** (up to 20MB) -> summary, flashcards, and quiz straight from the document
 - Rate limiting (30 requests/hour per IP, configurable) so the free quota stays safe
 
 ## Run it locally

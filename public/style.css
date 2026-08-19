@@ -264,6 +264,47 @@ body {
   background: #4338ca;
 }
 
+.note-btn.outline {
+  background: #ffffff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+
+.note-btn.outline:hover {
+  background: #eef2ff;
+}
+
+.pdf-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.pdf-name {
+  color: #475569;
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.pdf-hint {
+  margin: 10px 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
 .notes-result {
   margin-top: 16px;
   display: flex;

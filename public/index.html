@@ -42,6 +42,13 @@
       <button id="btn-flashcards" class="note-btn">Make Flashcards</button>
       <button id="btn-quiz" class="note-btn">Quiz me</button>
     </div>
+    <div class="pdf-row">
+      <button id="btn-pdf" class="note-btn outline">Upload PDF</button>
+      <input type="file" id="pdf-input" accept="application/pdf" hidden />
+      <span id="pdf-name" class="pdf-name"></span>
+      <button id="btn-clear-pdf" class="link-btn" hidden>Remove</button>
+    </div>
+    <p class="pdf-hint">Tip: the buttons above work on your pasted notes. If you upload a PDF, they use the PDF instead.</p>
     <div id="notes-result" class="notes-result"></div>
   </section>
 

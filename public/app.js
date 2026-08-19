@@ -15,9 +15,44 @@ const notesResult = document.getElementById('notes-result');
 const btnSummary = document.getElementById('btn-summary');
 const btnFlashcards = document.getElementById('btn-flashcards');
 const btnQuiz = document.getElementById('btn-quiz');
+const btnPdf = document.getElementById('btn-pdf');
+const pdfInput = document.getElementById('pdf-input');
+const pdfName = document.getElementById('pdf-name');
+const btnClearPdf = document.getElementById('btn-clear-pdf');
 
 const history = [];
 let busy = false;
+let selectedPdf = null;
+
+btnPdf.addEventListener('click', () => pdfInput.click());
+
+pdfInput.addEventListener('change', () => {
+  const file = pdfInput.files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    setStatus('Please choose a PDF file.');
+    return;
+  }
+  if (file.size > 20 * 1024 * 1024) {
+    setStatus('PDF is too large. Use a PDF under 20MB.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    selectedPdf = { name: file.name, data: reader.result.split(',')[1] };
+    pdfName.textContent = 'Using: ' + file.name;
+    btnClearPdf.hidden = false;
+    setStatus('');
+  };
+  reader.readAsDataURL(file);
+});
+
+btnClearPdf.addEventListener('click', () => {
+  selectedPdf = null;
+  pdfInput.value = '';
+  pdfName.textContent = '';
+  btnClearPdf.hidden = true;
+});
 
 function escapeHtml(text) {
   return text
@@ -258,8 +293,8 @@ function renderQuiz(questions) {
 
 async function runNotes(action) {
   const text = notesInput.value.trim();
-  if (!text) {
-    setStatus('Paste some notes first.');
+  if (!text && !selectedPdf) {
+    setStatus('Paste some notes or upload a PDF first.');
     return;
   }
   setStatus('');
@@ -271,14 +306,16 @@ async function runNotes(action) {
 
   const loading = document.createElement('div');
   loading.className = 'result-box';
-  loading.textContent = 'Thinking...';
+  loading.textContent = 'Reading your notes...';
   notesResult.appendChild(loading);
 
   try {
-    const res = await fetch('/api/notes', {
+    const res = await fetch(selectedPdf ? '/api/notes-pdf' : '/api/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, action }),
+      body: JSON.stringify(
+        selectedPdf ? { data: selectedPdf.data, action } : { text, action }
+      ),
     });
     const data = await res.json();
     if (!res.ok) {
