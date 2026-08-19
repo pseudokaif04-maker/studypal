@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyPal - Free Study Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>StudyPal</h1>
+    <p class="tagline">Your free study assistant. Ask anything, any subject.</p>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="chat" role="tab">Chat</button>
+      <button class="tab" data-tab="notes" role="tab">Notes</button>
+    </nav>
+  </header>
+
+  <main class="chat" id="chat" aria-live="polite">
+    <div class="message bot">
+      <p class="msg-label">StudyPal</p>
+      <div class="msg-text">Hi! I'm StudyPal, your study buddy. I can explain concepts, summarize notes, and quiz you to help you remember. What are you studying today?</div>
+    </div>
+  </main>
+
+  <div class="suggestions" id="suggestions">
+    <button class="chip" data-prompt="Explain the concept of photosynthesis in simple terms">Explain photosynthesis</button>
+    <button class="chip" data-prompt="Quiz me on the French Revolution, one question at a time">Quiz me: French Revolution</button>
+    <button class="chip" data-prompt="Explain the difference between covalent and ionic bonds">Covalent vs ionic bonds</button>
+  </div>
+
+  <form class="composer" id="composer">
+    <textarea id="input" rows="1" placeholder="Type your question..." aria-label="Your question"></textarea>
+    <button type="submit" id="send">Send</button>
+  </form>
+
+  <section class="panel" id="notes-panel" hidden>
+    <h2>Turn your notes into study tools</h2>
+    <textarea id="notes-input" rows="8" placeholder="Paste your class notes here..."></textarea>
+    <div class="note-actions">
+      <button id="btn-summary" class="note-btn">Summarize</button>
+      <button id="btn-flashcards" class="note-btn">Make Flashcards</button>
+      <button id="btn-quiz" class="note-btn">Quiz me</button>
+    </div>
+    <div id="notes-result" class="notes-result"></div>
+  </section>
+
+  <p class="status" id="status" hidden></p>
+
+  <script src="app.js"></script>
+</body>
+</html>
