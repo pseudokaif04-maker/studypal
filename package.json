@@ -1,0 +1,19 @@
+{
+  "name": "studypal",
+  "version": "1.0.0",
+  "description": "Free AI study assistant for college students",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "study",
+    "education",
+    "ai",
+    "tutor"
+  ],
+  "license": "MIT"
+}
