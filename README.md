@@ -1,6 +1,14 @@
 # StudyPal
 
+[![Live demo](https://img.shields.io/badge/live%20demo-studypal--pn3s.onrender.com-2ea44f?style=flat-square)](https://studypal-pn3s.onrender.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js&logoColor=white)](package.json)
+
 A free study assistant for college students. Chat with an AI tutor, or paste your notes to get a **summary**, **flashcards**, and a **practice quiz**.
+
+**Live demo:** https://studypal-pn3s.onrender.com/
+
+> The demo runs on Render's free tier, so the first load after a period of inactivity can take 30–60 seconds while the server wakes up.
 
 ## Why it's free
 
@@ -69,7 +77,7 @@ Browser (public/)  --POST /api/chat or /api/notes-->  server.js  --Gemini API-->
 2. Go to https://render.com and create a free account (Connect your GitHub).
 3. New -> Web Service -> pick your repo -> Render auto-detects `render.yaml`.
 4. Set the `GEMINI_API_KEY` secret in the dashboard (Dashboard -> your service -> Environment).
-5. Deploy. You get a free `https://studypal.onrender.com` URL to share.
+5. Deploy. You get a free `https://<service-name>.onrender.com` URL to share.
 
 Note: Render free services "spin down" after ~15 minutes idle, so the first request after a break can take ~30 seconds to wake up.
 
@@ -77,6 +85,6 @@ Note: Render free services "spin down" after ~15 minutes idle, so the first requ
 
 - [x] Chat with AI tutor
 - [x] Paste notes -> summary, flashcards, quiz
-- [ ] File upload (PDF/notes)
+- [x] File upload (PDF/notes)
 - [ ] Account system (free tier via Supabase)
 - [ ] Shareable study sets
