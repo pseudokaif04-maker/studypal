@@ -10,6 +10,15 @@ A free study assistant for college students. Chat with an AI tutor, or paste you
 
 > The demo runs on Render's free tier, so the first load after a period of inactivity can take 30–60 seconds while the server wakes up.
 
+![StudyPal chat interface](docs/studypal-chat.png)
+
+<details>
+<summary>Notes tab: paste notes, get a summary, flashcards, or a quiz</summary>
+
+![StudyPal notes tab](docs/studypal-notes.png)
+
+</details>
+
 ## Why it's free
 
 - **Google Gemini API** has a generous free tier.
