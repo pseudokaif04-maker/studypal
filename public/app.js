@@ -62,11 +62,100 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
+function inlineFormat(text) {
+  return text
+    .replace(/\$([^$]+)\$/g, (_, expr) => expr
+      .replace(/\\text\{([^}]*)\}/g, '$1')
+      .replace(/\\[a-zA-Z]+/g, '')
+      .replace(/_\{([^}]*)\}/g, '<sub>$1</sub>')
+      .replace(/_(\d+)/g, '<sub>$1</sub>')
+      .replace(/\^\{([^}]*)\}/g, '<sup>$1</sup>')
+      .replace(/\^(\d+)/g, '<sup>$1</sup>'))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+}
+
 function renderMarkdown(text) {
   const escaped = escapeHtml(text);
-  const withCode = escaped.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-  const withBold = withCode.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  return withBold.replace(/\n/g, '<br>');
+  const out = [];
+  let list = null;
+  let inCode = false;
+  let codeLines = [];
+
+  const closeList = () => {
+    if (list) {
+      out.push(`</${list}>`);
+      list = null;
+    }
+  };
+  const flushCode = () => {
+    if (inCode) {
+      out.push(`<pre><code>${codeLines.join('\n')}</code></pre>`);
+      inCode = false;
+      codeLines = [];
+    }
+  };
+
+  for (const raw of escaped.split('\n')) {
+    const line = raw.trim();
+
+    if (line.startsWith('```')) {
+      if (inCode) flushCode();
+      else { closeList(); inCode = true; }
+      continue;
+    }
+    if (inCode) {
+      codeLines.push(raw);
+      continue;
+    }
+    if (!line) {
+      closeList();
+      continue;
+    }
+    if (/^[-*_]{3,}$/.test(line)) {
+      closeList();
+      out.push('<hr>');
+      continue;
+    }
+
+    const heading = line.match(/^(#{1,6})\s+(.*)$/);
+    if (heading) {
+      closeList();
+      const level = Math.min(heading[1].length + 2, 6);
+      out.push(`<h${level}>${inlineFormat(heading[2])}</h${level}>`);
+      continue;
+    }
+
+    const bullet = line.match(/^[*\-•]\s+(.*)$/);
+    if (bullet) {
+      if (list !== 'ul') {
+        closeList();
+        out.push('<ul>');
+        list = 'ul';
+      }
+      out.push(`<li>${inlineFormat(bullet[1])}</li>`);
+      continue;
+    }
+
+    const numbered = line.match(/^\d+[.)]\s+(.*)$/);
+    if (numbered) {
+      if (list !== 'ol') {
+        closeList();
+        out.push('<ol>');
+        list = 'ol';
+      }
+      out.push(`<li>${inlineFormat(numbered[1])}</li>`);
+      continue;
+    }
+
+    closeList();
+    out.push(`<p>${inlineFormat(line)}</p>`);
+  }
+
+  flushCode();
+  closeList();
+  return out.join('');
 }
 
 function addMessage(role, text, typing) {

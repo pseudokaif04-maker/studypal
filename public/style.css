@@ -120,6 +120,29 @@ body {
   word-wrap: break-word;
 }
 
+.msg-text p {
+  margin: 8px 0;
+}
+
+.msg-text h3,
+.msg-text h4,
+.msg-text h5,
+.msg-text h6 {
+  margin: 16px 0 6px;
+  font-size: 0.95rem;
+  color: #4338ca;
+}
+
+.msg-text ul,
+.msg-text ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.msg-text li {
+  margin: 3px 0;
+}
+
 .msg-text pre {
   background: #0f172a;
   color: #e2e8f0;
@@ -317,8 +340,21 @@ body {
 }
 
 .result-box h3 {
-  margin-top: 0;
+  margin: 16px 0 6px;
   color: #4338ca;
+}
+
+.result-box h3:first-child {
+  margin-top: 0;
+}
+
+.result-box p {
+  margin: 8px 0;
+}
+
+.result-box ol {
+  padding-left: 20px;
+  margin: 6px 0;
 }
 
 .result-box ul {
